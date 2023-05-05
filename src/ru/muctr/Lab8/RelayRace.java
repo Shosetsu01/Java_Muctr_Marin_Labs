@@ -1,35 +1,49 @@
 package ru.muctr.Lab8;
 
+import java.util.Date;
+import java.util.Random;
+
 public class RelayRace {
-    private String team1 = "Команда 1";
-    private String team2 = "Команда 2";
-    private String winner;
-    private int runnersCount = 0;
+    public static void main(String[] args) {
+        // генерация случайной скорости от 7 до 12 м/с
+        Task firstRunnerTeam1 = new Task("Атлет 1", "Команда 1", 100, new Random().nextInt(6) + 7);
+        Task secondRunnerTeam1 = new Task("Атлет 2", "Команда 1", 100, new Random().nextInt(6) + 7);
 
-    public synchronized void addRunner() {
-        runnersCount++;
-    }
+        Task firstRunnerTeam2 = new Task("Атлет 1", "Команда 2", 100, new Random().nextInt(6) + 7);
+        Task secondRunnerTeam2 = new Task("Атлет 2", "Команда 2", 100, new Random().nextInt(6) + 7);
 
-    public synchronized int getRunnersCount() {
-        return runnersCount;
-    }
+        firstRunnerTeam1.setNextRunner(secondRunnerTeam1);
+        firstRunnerTeam2.setNextRunner(secondRunnerTeam2);
 
-    public synchronized String getTeam() {
-        if (runnersCount % 2 == 0) {
-            return team2;
+        Thread thread1 = new Thread(firstRunnerTeam1);
+        Thread thread2 = new Thread(firstRunnerTeam2);
+
+        System.out.println("-----------------------------------------------------------------------------------");
+        System.out.println("Эстафета началась! Текущее время: " + new Date());
+        System.out.println("-----------------------------------------------------------------------------------");
+
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        long team1FinishTime = secondRunnerTeam1.getFinishTime();
+        long team2FinishTime = secondRunnerTeam2.getFinishTime();
+        System.out.println("-----------------------------------------------------------------------------------");
+        System.out.println("\uD83C\uDFC1 " + "Команда 1 финишировала в " + new Date(team1FinishTime));
+        System.out.println("\uD83C\uDFC1 " + "Команда 2 финишировала в " + new Date(team2FinishTime));
+        System.out.println("-----------------------------------------------------------------------------------");
+        if (team1FinishTime < team2FinishTime) {
+            System.out.println("\uD83C\uDF86\uD83C\uDF86\uD83C\uDF86 " + "Команда 1 победила!");
+        } else if (team1FinishTime > team2FinishTime) {
+            System.out.println("\uD83C\uDF86\uD83C\uDF86\uD83C\uDF86 " + "Команда 2 победила!");
         } else {
-            return team1;
+            System.out.println("Это ничья!");
         }
-    }
-
-    public synchronized void setWinner(String name) {
-        if (winner == null) {
-            winner = name;
-        }
-    }
-
-    public synchronized String getWinner() {
-        return winner;
     }
 }
-

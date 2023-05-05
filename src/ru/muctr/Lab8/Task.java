@@ -3,49 +3,59 @@ package ru.muctr.Lab8;
 import java.util.Date;
 
 public class Task implements Runnable {
-    private String name;
-    private double speed;
-    private long distance;
-    private long sleepTime;
-    private Date startTime;
-    private Date endTime;
-    private RelayRace relayRace;
+    private String athleteName;
+    private String teamName;
+    private int distance;
+    private int speed;
+    private Task nextRunner;
+    private long startTime;
+    private long finishTime;
 
-    public Task(String name, double speed, long distance, RelayRace relayRace) {
-        this.name = name;
-        this.speed = speed;
+    public Task(String athleteName, String teamName, int distance, int speed) {
+        this.athleteName = athleteName;
+        this.teamName = teamName;
         this.distance = distance;
-        this.relayRace = relayRace;
-        this.sleepTime = (long) (distance / speed * 500);
+        this.speed = speed;
+    }
+
+    public void setNextRunner(Task nextRunner) {
+        this.nextRunner = nextRunner;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public long getFinishTime() {
+        return finishTime;
     }
 
     @Override
     public void run() {
-        try {
-            // Старт потока-атлета
-            synchronized (relayRace) {
-                relayRace.addRunner();
-                if (relayRace.getRunnersCount() == 2) {
-                    relayRace.notifyAll();
-                    System.out.println(new Date() + ": Эстафета началась");
-                } else {
-                    relayRace.wait();
-                }
+        System.out.println("\uD83C\uDFC3 " + athleteName + " из " + teamName + " побежал со скоростью " + speed +  "м/с время старта "+  new Date());
+
+        startTime = System.currentTimeMillis();
+        int remainingDistance = distance;
+
+        while (remainingDistance > 0) {
+            // Вычисляем время, которое поток должен спать, чтобы передвинуться на 1 метр
+            long sleepTime = (long) ((double) 1000 / speed);
+
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
-            // Спим, чтобы пробежать заданное расстояние
-            Thread.sleep(sleepTime);
+            remainingDistance--;
+        }
 
-            // Завершение гонки
-            synchronized (relayRace) {
-                endTime = new Date();
-                System.out.println(name + " из команды " + relayRace.getTeam() + " финишировал в " + endTime);
-                relayRace.setWinner(name);
-                relayRace.notifyAll();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        finishTime = System.currentTimeMillis();
+        System.out.println("\uD83C\uDF89 " + athleteName + " из " + teamName + " финишировал в " + new Date());
+
+        if (nextRunner != null) {
+            System.out.println("\uD83D\uDCE6 " + athleteName + " передал эстафету напарнику из " + nextRunner.getTeamName() + ".");
+            nextRunner.run();
         }
     }
 }
-
