@@ -2,6 +2,8 @@ package ru.muctr.Lab8;
 
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 public class RelayRace {
     public static void main(String[] args) {
@@ -15,8 +17,25 @@ public class RelayRace {
         firstRunnerTeam1.setNextRunner(secondRunnerTeam1);
         firstRunnerTeam2.setNextRunner(secondRunnerTeam2);
 
-        Thread thread1 = new Thread(firstRunnerTeam1);
-        Thread thread2 = new Thread(firstRunnerTeam2);
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        Thread thread1 = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+            firstRunnerTeam1.run();
+        });
+
+        Thread thread2 = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+            firstRunnerTeam2.run();
+        });
 
         System.out.println("-----------------------------------------------------------------------------------");
         System.out.println("Эстафета началась! Текущее время: " + new Date());

@@ -23,16 +23,18 @@ public class Warehouse extends Observable {
         quantity.put("кровать", 2);
     }
 
-    public void update(String item){                    //обрабаьывает запрос на покупку
+    public Boolean update(String item){                    //обрабаьывает запрос на покупку
         int prevValue = quantity.get(item);
         if (prevValue == 0) {
-            System.out.println("Товара \"" + item + "\" нет на складе.");
+            System.out.println("Склад: Товара \"" + item + "\" нет на складе.");
+            return false;
         } else {
             System.out.println("Спасибо за покупку!");
             quantity.put(item, --prevValue);
             setChanged();
             PurchaseNotification notification = new PurchaseNotification(item, quantity);
             notifyObservers(notification);
+            return true;
         }
     }
 

@@ -56,8 +56,10 @@ public class Shop {
                     acc.getIncome(item.substring(item.indexOf(" ") + 1));
                 } else {
                     if (price.containsKey(item)) {
-                        wh.update(item);
-                        acc.update(price.get(item));
+                        Boolean sale = wh.update(item);
+                        if (sale) {
+                            acc.update(price.get(item));
+                        }
                     } else {
                         System.out.println("Товара \"" + item + "\" нет на складе.");
                     }
